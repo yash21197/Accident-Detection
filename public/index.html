@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Accident_Detection</title>
+
+        <link rel="stylesheet" type="text/css" href="/assets/index.css">
+
+        <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+        <script type="text/javascript" src="index.js"></script>
+        <script type="text/javascript" src="markerclusterer.js"></script>
+        <script type="text/javascript" src="oms.min.js"></script>
+        <script>var isIE = false;</script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+        <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+
+        <script type="text/javascript" src="offline.js"></script>
+        <link rel="stylesheet" href="assets/offline.css"/>
+
+    </head>
+
+    <body id="fullscreen" class="html5-fullscreen-api" onload="onloading()">
+        <!-- Demo content -->
+
+        <div class="loader">
+
+            <div class="door1"></div>
+            <div class="door2"></div>
+            <div class="door3"></div>
+            <div class="door4"></div>
+
+            <div class="sk-cube-grid">
+                <div class="sk-cube sk-cube1"></div>
+                <div class="sk-cube sk-cube2"></div>
+                <div class="sk-cube sk-cube3"></div>
+                <div class="sk-cube sk-cube4"></div>
+                <div class="sk-cube sk-cube5"></div>
+                <div class="sk-cube sk-cube6"></div>
+                <div class="sk-cube sk-cube7"></div>
+                <div class="sk-cube sk-cube8"></div>
+                <div class="sk-cube sk-cube9"></div>
+            </div>
+
+        </div>
+
+        <!-- /Demo content -->
+
+        <div class="maincontainer" id="maincontainer">
+
+            <div class="cartain" id="cartain"></div>
+
+            <div id="searchbtn">
+                <input id="pac-input" class="controls" type="text" placeholder="Start typing your address...">
+            </div>
+
+            <div class="login_logout_btn">
+                <img id="in_out_btn" src="assets/user.png">
+            </div>
+
+            <div class="userinfo">
+                <div class="account" id="account">
+                    <div class="log_in" id="log_in">
+                        <input type="email" id="emailid" class="acc_fields" placeholder="email-id"><br/>
+                        <input type="password" id="passwd" class="acc_fields" placeholder="PassWord" onkeyup="checkPassWd(this.value)"><br/>
+                        <span class="forgot" id="forgot">Forgot PassWord</span><br/>
+                        <span class="strength" id="strength"></span><br/>
+                        <input type="button" value="SignIn" id="loginBtn" class="signBtn">
+                        <input type="button" value="SignUp" id="signupBtn" class="signBtn">
+                    </div>
+                </div>
+                <div class="account" id="account">
+                  <div class="userprofile" id="userprofile">
+                      <input type="text" id="user_name" class="acc_fields" placeholder="Hospital_name">
+                      <input type="email" id="user_eid" class="acc_fields" placeholder="email-id">
+                      <input type="tel" id="user_tel" class="acc_fields" placeholder="+countrycode-mobilenumber">
+                      <input type="text" id="user_latlong" class="acc_fields" placeholder="latitude,longitude (permanent)">
+                      <span class="reset" id="reset">ReSet PassWord.</span><br/>
+                      <input type="button" id="user_save" class="user_btn" value="UpDate_Info">
+                      <input type="button" id="signoutBtn" class="user_btn" value="SignOut">
+                  </div>
+                </div>
+            </div>
+
+            <div id="date_time" ng-app="MyApp" ng-controller="MyCtrl" ng-cloak>
+                <div class="cal-icon">
+                    <img id="calicon" src="assets/calendar-icon-png-1.png" ng-click="setcurrentdate()" ng-model="settimemodel">
+                </div>
+                <form class="demo-section">
+                    <input id="dateshower" type="text" placeholder="DD-MM-YYYY"
+                           ng-model="datemodel"
+                           data-ng-init="initdate()"
+                           ng-keyup="setdatevalue()"
+                           ng-keydown="copylast()"/>
+                </form>
+
+                <div class="dateandtimepicker">
+                    <div class="app-container">
+                        <div date-picker
+                             datepicker-title="Select Date"
+                             picktime="true"
+                             pickdate="true"
+                             pickpast="true"
+                             mondayfirst="false"
+                             custom-message="You have selected"
+                             selecteddate="ctrl.selected_date"
+                             updatefn="ctrl.updateDate(newdate)">
+
+                            <div class="datepicker">
+                                <div class="datepicker-header">
+                                    <div class="datepicker-title" ng-if="datepicker_title">{{ datepickerTitle }}</div>
+                                    <div class="datepicker-subheader">{{ customMessage }} {{ selectedDay }} {{ monthNames[localdate.getMonth()] }} {{ localdate.getDate() }}, {{ localdate.getFullYear() }}</div>
+                                </div>
+                                <div class="timeshower" id="timeshower">
+                                    <span>00:00:00</span>
+                                </div>
+                                <div class="datepicker-calendar">
+                                    <div class="calendar-header">
+
+                                        <div class="godoubleback" ng-click="movedoubleBack()" ng-if="pickdate">
+                                            <div class="svg1">
+                                                <svg width="30" height="30">
+                                                    <path fill="none" stroke="#0DAD83" stroke-width="3" d="M19,6 l-9,9 l9,9"/>
+                                                </svg>
+                                            </div>
+                                            <div class="svg2">
+                                                <svg width="30" height="30">
+                                                    <path fill="none" stroke="#0DAD83" stroke-width="3" d="M19,6 l-9,9 l9,9"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        <div class="goback" ng-click="moveBack()" ng-if="pickdate">
+                                            <svg width="30" height="30">
+                                                <path fill="none" stroke="#0DAD83" stroke-width="3" d="M19,6 l-9,9 l9,9"/>
+                                            </svg>
+                                        </div>
+                                        <div class="current-month-container">{{ currentViewDate.getFullYear() }} {{ currentMonthName() }}</div>
+
+                                        <div class="godoubleforward" ng-click="movedoubleForward()" ng-if="pickdate">
+                                            <div class="svg3">
+                                                <svg width="30" height="30">
+                                                    <path fill="none" stroke="#0DAD83" stroke-width="3" d="M11,6 l9,9 l-9,9" />
+                                                </svg>
+                                            </div>
+                                            <div class="svg4">
+                                                <svg width="30" height="30">
+                                                    <path fill="none" stroke="#0DAD83" stroke-width="3" d="M11,6 l9,9 l-9,9" />
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        <div class="goforward" ng-click="moveForward()" ng-if="pickdate">
+                                            <svg width="30" height="30">
+                                                <path fill="none" stroke="#0DAD83" stroke-width="3" d="M11,6 l9,9 l-9,9" />
+                                            </svg>
+                                        </div>
+
+                                    </div>
+                                    <div class="calendar-day-header">
+                                        <span ng-repeat="day in days" class="day-label">{{ day.short }}</span>
+                                    </div>
+                                    <div class="calendar-grid" ng-class="{false: 'no-hover'}[pickdate]">
+                                        <div
+                                            ng-class="{'no-hover': !day.showday}"
+                                            ng-repeat="day in month"
+                                            class="datecontainer"
+                                            ng-style="{'margin-left': calcOffset(day, $index)}"
+                                            track by $index>
+                                            <div class="datenumber" ng-class="{'day-selected': day.selected }" ng-click="selectDate(day)">
+                                                {{ day.daydate }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="todaydate" ng-click="setTodayDate()">
+                                        Today's Date
+                                    </div>
+                                    <div class="buttons-container">
+                                        <div ng-click='canceldate()' class="cancel-button">CANCEL</div>
+                                        <div ng-click='savedate()' class="save-button">SAVE</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mapbuttons">
+
+                <div id="img" class="img4">
+                    <img id="screen" src="assets/fullscreen.png" >
+                </div>
+
+                <div id="img" class="img1">
+                    <img id="locationimg" src="assets/ac1c181d6a656fa5585bf7c0f1489803-location-pointer-round-icon-by-vexels.png" >
+                </div>
+
+                <div id="img" class="img2">
+                    <img id="allimg" src="assets/Republic_Of_Korea_Broadcasting-TV_Rating_System(ALL).svg.png" >
+                </div>
+
+                <div id="img" class="img3">
+                    <div id="number">0</div>
+                    <img id="notification" src="assets/bell-1096280_640.png" >
+                </div>
+
+            </div>
+
+
+            <audio id="beepaudio" src="assets/beep-07.wav"></audio>
+            <audio id="notificationaudio" src="assets/171756__nenadsimic__picked-coin-echo-2.wav"></audio>
+            <audio id="alertaudio" src="assets/91926__corsica-s__ding.wav"></audio>
+
+            <div class="map" id="googlemap">
+                <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;key=AIzaSyB_4Jf0FmbXrJL7BoQH7lLOZoSNGQaa5y8&sensor=true&callback=initMap"></script>
+            </div>
+
+            <div id="snackbar">You can search place or double click on map or current location</div>
+
+            <div id="myModal" class="modal">
+
+                <!-- The Close Button -->
+                <span class="close" onclick="document.getElementById('myModal').style.display='none'">&times;</span>
+
+                <!-- Modal Content (The Image) -->
+                <img class="modal-content" id="img01">
+
+                <div class="outer">
+                    <div class="inner"></div>
+                </div>
+
+                <!-- Modal Caption (Image Text) -->
+                <div id="captions">
+                    <div id="caption_title"></div>
+                    <div id="caption_lat"></div>
+                    <div id="caption_lng"></div>
+                    <div id="caption_add"></div>
+                    <div id="caption_time"></div>
+                </div>
+
+                <div id="helpbutton">
+                    <input type="button" id="helpbtn" value="Send Help">
+                </div>
+
+                <div class="helpstate" id="helpstate">
+                    <span id="horn"></span>
+                </div>
+
+            </div>
+
+            <div class="datashowing" id="datashowing">
+                <div class="databox">
+                    <div id="box_data_buttons">
+                        <div id="closepanel" class="closepanel">
+                            <div id="closebtn"></div>
+                        </div>
+                    </div>
+                    <div id="boxdata">
+                        <div class="mcs-horizontal-example" id="mcs-horizontal-example">
+                            <div id="dataindex"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+
+</html>

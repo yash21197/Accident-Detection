@@ -1,0 +1,22 @@
+{
+  "name": "accident_detection",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "accident",
+    "detection"
+  ],
+  "author": "DA-IICT",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "firebase": "^5.2.0",
+    "firebase-admin": "^5.13.0",
+    "socket.io": "^2.1.1"
+  }
+}

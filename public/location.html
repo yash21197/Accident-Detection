@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>sorting locations</title>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRiffy5-w9a_BUpBbPpA3TEpLgO783cj8"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            $(document).ready(function(){
+              var lat = NaN;
+              var lng = NaN;
+              var geocoder=null;
+              var parameters = location.search.substring(1).split("&");
+              var temp = parameters[0].split("=");
+              lat = unescape(temp[1]);
+              temp = parameters[1].split("=");
+              lng = unescape(temp[1]);
+              if(!isNaN(lat) && !isNaN(lng)){
+                  var city = "none",state = "none",country = "none",address = "none",date = "none",time = "none";
+                  geocoder = new google.maps.Geocoder();
+                  geocoder.geocode({ 'latLng': new google.maps.LatLng(lat , lng) }, function (results, status) {
+                      if (status == google.maps.GeocoderStatus.OK) {
+                          if (results[0]){
+                              address = results[0].formatted_address;
+                              for (var i = 0; i < results[0].address_components.length; i++) {
+                                  var addr = results[0].address_components[i];
+                                  if (addr.types[0] == 'country')
+                                      country = addr.long_name;
+                                  else if (addr.types[0] == ['administrative_area_level_1'])
+                                      state = addr.long_name;
+                                  else if (addr.types[0] == ['locality'])
+                                      city = addr.long_name;
+                              }
+                              time = new Date().toTimeString();
+                              time = time.split(" ");
+                              time = time[0] + " " + time[1];
+                              var day = (new Date().getDate()).toString();
+                              var month = (new Date().getMonth()+1).toString();
+                              var year = (new Date().getFullYear()).toString();
+                              if(day.length==1)
+                                  day = "0"+day;
+                              if(month.length==1)
+                                  month = "0"+month;
+                              var date = day+'-'+month+"-"+year;
+
+                              var obj = {
+                                  latitude: lat,
+                                  longitude: lng,
+                                  city: city,
+                                  state: state,
+                                  country: country,
+                                  address: address,
+                                  date: date,
+                                  time: time,
+                                  imgURL : 'https://firebasestorage.googleapis.com/v0/b/accidentdetection-449db.appspot.com/o/crash.png?alt=media&token=7a91d22f-507a-4b58-81ab-0a7d608c8347'
+                              };
+                              console.log(obj);
+                              $.ajax({
+                                type : 'POST',
+                                url : '/pushLocation',
+                                data : {
+                                  latitude: lat,
+                                  longitude: lng,
+                                  city: city,
+                                  state: state,
+                                  country: country,
+                                  address: address,
+                                  date: date,
+                                  time: time,
+                                  imgURL : 'https://firebasestorage.googleapis.com/v0/b/accidentdetection-449db.appspot.com/o/crash.png?alt=media&token=7a91d22f-507a-4b58-81ab-0a7d608c8347'
+                                },
+                                success : function(data){
+                                  console.log('successfully pushed data.');
+                                }
+                              });
+                          }else{
+                              console.log("No reverse geocode results.")
+                          }
+                      }else if (status == google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+                          console.log("OVER_QUERY_LIMIT");
+                      }else{
+                          console.log("Geocoder failed: " + status);
+                      }
+                  });
+              }else{
+                  console.log("Not a Number...");
+              }
+            });
+        </script>
+    </body>
+</html>
